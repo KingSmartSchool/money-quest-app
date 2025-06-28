@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "title": "完成收入來源盤點",
+    "description": "寫下目前的主動與被動收入來源與比例，並記錄在 Notion",
+    "due": "2025-06-30",
+    "value": 10000,
+    "completed": false
+  },
+  {
+    "id": 2,
+    "title": "設計一套可販售的數位商品",
+    "description": "利用你過去教學經驗與 AI 工具設計第一套販售型產品",
+    "due": "2025-07-10",
+    "value": 20000,
+    "completed": false
+  },
+  {
+    "id": 3,
+    "title": "建立任務追蹤與記錄表單",
+    "description": "做一份 Notion／Google Sheet 表格來追蹤任務與每月進帳金額",
+    "due": "2025-07-05",
+    "value": 5000,
+    "completed": false
+  }
+]
