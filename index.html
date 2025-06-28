@@ -20,13 +20,24 @@
   </header>
 
   <main>
-    <section id="income-entry">
-  <h2>📥 實際收入更新</h2>
-  <p>請輸入你最近一筆收入：</p>
-  <input type="number" id="income-input" placeholder="例如：10000" />
+    
+<section id="income-entry">
+  <h2>📥 新增收入紀錄</h2>
+  
+  <p>💼 主動收入：</p>
+  <input type="number" id="active-income" placeholder="例如：15000" />
+
+  <p>🌱 被動收入：</p>
+  <input type="number" id="passive-income" placeholder="例如：200" />
+
   <button onclick="addIncome()">新增收入</button>
-  <p>已累計收入：<strong id="earned-total">NT$0</strong></p>
+
+  <hr />
+  <p>💰 主動收入累計：<strong id="active-total">NT$0</strong></p>
+  <p>🌱 被動收入累計：<strong id="passive-total">NT$0</strong></p>
+  <p>🏦 當前資產總額：<strong id="earned-total">NT$0</strong></p>
 </section>
+
 
     <h2>📋 任務清單</h2>
     <ul id="task-list"></ul>
