@@ -1,134 +1,93 @@
-let startingCapital = 0;
+// 初始變數
+let startAmount = 0;
+let goalAmount = 0;
+let goalDate = null;
 let activeIncome = 0;
 let passiveIncome = 0;
-let targetAmount = 0;
-let endDate = null;
-let activeIncomeRecords = [];
-let incomeChart = null;
+let activeIncomeHistory = []; // 儲存主動收入紀錄
 
-// ─── 初始化，載入 localStorage 和畫面 ─────────────────
-function loadData() {
-  startingCapital = Number(localStorage.getItem("initialFund")) || 0;
-  activeIncome     = Number(localStorage.getItem("activeIncome")) || 0;
-  passiveIncome    = Number(localStorage.getItem("passiveIncome")) || 0;
-  targetAmount     = Number(localStorage.getItem("goalAmount"))   || 0;
-  endDate          = localStorage.getItem("goalDeadline")         || null;
-  activeIncomeRecords = JSON.parse(localStorage.getItem("incomeRecords")) || [];
-
-  // 如果有先前設定，再顯示出來
-  document.getElementById("initial-amount").textContent     = `NT$${startingCapital.toLocaleString()}`;
-  document.getElementById("active-total").textContent       = `NT$${activeIncome.toLocaleString()}`;
-  document.getElementById("passive-total").textContent      = `NT$${passiveIncome.toLocaleString()}`;
-  document.getElementById("earned-total").textContent       = `NT$${(startingCapital+activeIncome+passiveIncome).toLocaleString()}`;
-
-  if (targetAmount && endDate) {
-    document.getElementById("goal-amount").textContent = `NT$${targetAmount.toLocaleString()}`;
-    const daysLeft = Math.ceil((new Date(endDate) - new Date())/(1000*60*60*24));
-    document.getElementById("days-left").textContent = `${daysLeft} 天`;
-  }
-
-  updateDisplay();
-  updateActiveIncomeChart();
-}
-
-// ─── 更新畫面所有數值與進度條 ─────────────────────
+// 更新畫面上所有統計資料
 function updateDisplay() {
-  const total = startingCapital + activeIncome + passiveIncome;
-  document.getElementById("startingCapitalDisplay")?.remove?.(); // just in case old
-  document.getElementById("active-total").textContent  = `NT$${activeIncome.toLocaleString()}`;
-  document.getElementById("passive-total").textContent = `NT$${passiveIncome.toLocaleString()}`;
-  document.getElementById("earned-total").textContent = `NT$${total.toLocaleString()}`;
+  const currentTotal = startAmount + activeIncome + passiveIncome;
+  document.getElementById("startAmountDisplay").textContent = `NT$${startAmount.toLocaleString()}`;
+  document.getElementById("goalAmount").textContent = `NT$${goalAmount.toLocaleString()}`;
+  document.getElementById("activeIncome").textContent = `NT$${activeIncome.toLocaleString()}`;
+  document.getElementById("passiveIncome").textContent = `NT$${passiveIncome.toLocaleString()}`;
+  document.getElementById("currentTotal").textContent = `NT$${currentTotal.toLocaleString()}`;
 
-  if (targetAmount > 0) {
-    const pct = Math.min(100, (total/targetAmount)*100).toFixed(1);
-    document.getElementById("progress-bar").style.width = `${pct}%`;
-    document.getElementById("progress-percent").textContent = `${pct}%`;
+  // 更新進度條
+  let progress = goalAmount ? Math.min((currentTotal / goalAmount) * 100, 100) : 0;
+  document.getElementById("progressFill").style.width = `${progress}%`;
+  document.getElementById("progressPercent").textContent = `${progress.toFixed(1)}%`;
+
+  // 更新剩餘天數
+  if (goalDate) {
+    const today = new Date();
+    const end = new Date(goalDate);
+    const diffTime = end - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    document.getElementById("remainingDays").textContent = `${diffDays} 天`;
   }
+  
+  // 更新收入歷史
+  updateHistoryList();
 }
 
-// ─── 設定起始資金 ─────────────────────────────
-function setInitial() {
-  const v = Number(document.getElementById("initial-fund").value) || 0;
-  if (v>=0) {
-    startingCapital = v;
-    localStorage.setItem("initialFund", v);
-    document.getElementById("initial-amount").textContent = `NT$${v.toLocaleString()}`;
-    updateDisplay();
-    updateActiveIncomeChart();
-    document.getElementById("initial-fund").value = "";
-  } else alert("請輸入有效起始資金");
-}
-
-// ─── 設定目標挑戰 ─────────────────────────────
-function setGoal() {
-  const amt = Number(document.getElementById("goal-amount-input").value) || 0;
-  const dt  = document.getElementById("goal-deadline-input").value;
-  if (amt>0 && dt) {
-    targetAmount = amt;
-    endDate = dt;
-    localStorage.setItem("goalAmount", amt);
-    localStorage.setItem("goalDeadline", dt);
-
-    document.getElementById("goal-amount").textContent = `NT$${amt.toLocaleString()}`;
-    const daysLeft = Math.ceil((new Date(dt) - new Date())/(1000*60*60*24));
-    document.getElementById("days-left").textContent = `${daysLeft} 天`;
-
-    updateDisplay();
-  } else alert("請輸入目標金額與日期");
-}
-
-// ─── 新增收入函式（被主動和被動共用） ─────────────────
-function addIncome(){
-  // 主動
-  const a = Number(document.getElementById("active-income").value) || 0;
-  // 被動
-  const p = Number(document.getElementById("passive-income").value) || 0;
-
-  if (a>0) {
-    activeIncome += a;
-    activeIncomeRecords.push({ date: new Date().toISOString().split("T")[0], amount: a });
-    localStorage.setItem("activeIncome", activeIncome);
-    localStorage.setItem("incomeRecords", JSON.stringify(activeIncomeRecords));
-  }
-  if (p>0) {
-    passiveIncome += p;
-    localStorage.setItem("passiveIncome", passiveIncome);
-  }
+// 設定起始資金
+function setStartAmount() {
+  const input = document.getElementById("startAmountInput").value;
+  startAmount = parseInt(input) || 0;
   updateDisplay();
-  updateActiveIncomeChart();
-  document.getElementById("active-income").value = "";
-  document.getElementById("passive-income").value = "";
 }
 
-// ─── 畫主動收入成長圖 ─────────────────────────
-function updateActiveIncomeChart(){
-  const ctx = document.getElementById("activeIncomeChart").getContext("2d");
-  const labels = activeIncomeRecords.map(r=>r.date);
-  let cum=0;
-  const data = activeIncomeRecords.map(r=>(cum+=r.amount));
+// 設定目標
+function setGoal() {
+  const inputAmount = document.getElementById("goalInput").value;
+  const inputDate = document.getElementById("goalDateInput").value;
 
-  if (incomeChart){
-    incomeChart.data.labels = labels;
-    incomeChart.data.datasets[0].data = data;
-    incomeChart.update();
-  } else {
-    incomeChart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels,
-        datasets: [{
-          label: "主動收入累積",
-          data,
-          borderColor: "green",
-          backgroundColor: "rgba(0,128,0,0.2)",
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: { responsive: true }
+  goalAmount = parseInt(inputAmount) || 0;
+  goalDate = inputDate;
+  updateDisplay();
+}
+
+// 新增主動收入
+function addActiveIncome() {
+  const input = document.getElementById("activeInput").value;
+  const amount = parseInt(input) || 0;
+  if (amount > 0) {
+    activeIncome += amount;
+    // 新增收入紀錄
+    activeIncomeHistory.push({
+      amount: amount,
+      timestamp: new Date().toISOString()
     });
+    updateDisplay();
+    document.getElementById("activeInput").value = "";
   }
 }
 
-// ─── 啟動 ─────────────────────────────
-window.onload = loadData;
+// 新增被動收入
+function addPassiveIncome() {
+  const input = document.getElementById("passiveInput").value;
+  const amount = parseInt(input) || 0;
+  if (amount > 0) {
+    passiveIncome += amount;
+    updateDisplay();
+    document.getElementById("passiveInput").value = "";
+  }
+}
+
+// 顯示主動收入紀錄
+function updateHistoryList() {
+  const ul = document.getElementById("activeHistory");
+  ul.innerHTML = "";
+  activeIncomeHistory.forEach(entry => {
+    const li = document.createElement("li");
+    const date = new Date(entry.timestamp);
+    li.textContent = `${date.toLocaleString()}：NT$${entry.amount.toLocaleString()}`;
+    ul.appendChild(li);
+  });
+}
+
+// 初始執行一次畫面更新
+updateDisplay();
