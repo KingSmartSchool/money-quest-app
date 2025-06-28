@@ -1,73 +1,81 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Money Quest App</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>金流升等任務</title>
+  <style>
+    body { font-family: "Segoe UI", sans-serif; background: #f9f9f9; margin: 0; padding: 1em; }
+    .section { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    h2 { margin-top: 0; }
+    input[type="number"], input[type="text"], input[type="date"] {
+      padding: 5px; margin-right: 10px;
+    }
+    button { padding: 5px 10px; }
+    .label { font-weight: bold; margin-top: 1em; display: block; }
+    .progress-bar {
+      background-color: #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      height: 20px;
+      margin: 10px 0;
+    }
+    .progress-fill {
+      background-color: #4caf50;
+      height: 100%;
+      width: 0%;
+      transition: width 0.5s ease-in-out;
+    }
+  </style>
 </head>
-  
 <body>
-  <header>
-    <h1>💰 我的金流升等任務</h1>
-    <section id="goal-section">
-      <p>目標金額：<strong id="goal-amount">--</strong></p>
-      <p>剩餘天數：<strong id="days-left">--</strong></p>
-      <div class="progress-container">
-        <div class="progress-bar" id="progress-bar"></div>
-      </div>
-      <p>目前進度：<strong id="progress-percent">0%</strong></p>
-    </section>
-  </header>
+  <div class="section">
+    <h2>💰 我的金流升等任務</h2>
+    <div>目標金額：<span id="goalAmount">NT$0</span></div>
+    <div>剩餘天數：<span id="remainingDays">0 天</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div>目前進度：<span id="progressPercent">0%</span></div>
+  </div>
 
-  <main>
+  <div class="section">
+    <h3>🎮 起始資金：</h3>
+    <input type="number" id="startAmountInput" placeholder="例如：50000"/>
+    <button onclick="setStartAmount()">設定起始資金</button>
+    <div class="label">📌 起始資產：<span id="startAmountDisplay">NT$0</span></div>
+  </div>
 
-<div>
-  <h3>🏁 起始資金：</h3>
-  <input type="number" id="initial-fund" placeholder="例如：50000">
-  <button onclick="setInitial()">設定起始資金</button>
-  <p>📌 起始資產：<span id="initial-amount">NT$0</span></p>
-</div>
+  <div class="section">
+    <h3>🎯 設定目標挑戰</h3>
+    <label>請輸入目標金額（例如：3000000）：</label><br/>
+    <input type="number" id="goalInput" placeholder="例如：300000"/>
+    <br/><br/>
+    <label>請選擇挑戰截止日：</label><br/>
+    <input type="date" id="goalDateInput"/>
+    <button onclick="setGoal()">設定目標</button>
+  </div>
 
+  <div class="section">
+    <h3>🧾 主動收入：</h3>
+    <input type="number" id="activeInput" placeholder="例如：15000"/>
+    <button onclick="addActiveIncome()">新增收入</button>
+    <div class="label">💼 主動收入累計：<span id="activeIncome">NT$0</span></div>
+  </div>
 
-<section id="goal-settings">
-  <h2>🎯 設定目標挑戰</h2>
-  <p>請輸入目標金額（例如：3000000）：</p>
-  <input type="number" id="goal-amount-input" placeholder="例如：3000000" />
+  <div class="section">
+    <h3>🌱 被動收入：</h3>
+    <input type="number" id="passiveInput" placeholder="例如：200"/>
+    <button onclick="addPassiveIncome()">新增收入</button>
+    <div class="label">🌿 被動收入累計：<span id="passiveIncome">NT$0</span></div>
+  </div>
 
-  <p>請選擇挑戰截止日：</p>
-  <input type="date" id="goal-deadline-input" />
+  <div class="section">
+    <h3>🏦 當前資產總額：<span id="currentTotal">NT$0</span></h3>
+  </div>
 
-  <button onclick="setGoal()">設定目標</button>
-  <hr />
-</section>
-
-    
-<section id="income-entry">
-  <h2>📥 新增收入紀錄</h2>
-  
-  <p>💼 主動收入：</p>
-  <input type="number" id="active-income" placeholder="例如：15000" />
-
-  <p>🌱 被動收入：</p>
-  <input type="number" id="passive-income" placeholder="例如：200" />
-
-  <button onclick="addIncome()">新增收入</button>
-
-  <hr />
-  <p>💰 主動收入累計：<strong id="active-total">NT$0</strong></p>
-  <p>🌱 被動收入累計：<strong id="passive-total">NT$0</strong></p>
-  <p>🏦 當前資產總額：<strong id="earned-total">NT$0</strong></p>
-</section>
-    
-<h2>📈 主動收入成長圖</h2>
-<canvas id="activeIncomeChart" width="600" height="300"></canvas>
-
-
-    <h2>📋 任務清單</h2>
-    <ul id="task-list"></ul>
-  </main>
+  <div class="section">
+    <h3>📅 收入紀錄（主動收入）</h3>
+    <ul id="activeHistory"></ul>
+  </div>
 
   <script src="script.js"></script>
 </body>
