@@ -48,7 +48,10 @@ document.getElementById('setGoal').addEventListener('click', function () {
   }
 });
 
-// 新增主動收入並記錄時間
+// 儲存主動收入紀錄（時間與金額）
+let activeIncomeRecords = [];
+
+// 新增主動收入按鈕功能
 document.getElementById('addActiveIncome').addEventListener('click', function () {
   const input = document.getElementById('activeIncomeInput');
   const value = parseInt(input.value);
@@ -56,17 +59,19 @@ document.getElementById('addActiveIncome').addEventListener('click', function ()
   if (!isNaN(value) && value > 0) {
     activeIncome += value;
 
-    // 記錄主動收入時間與金額
+    // ➕ 紀錄主動收入時間與金額
+    const today = new Date().toISOString().split('T')[0];
     activeIncomeRecords.push({
-      date: new Date().toISOString().split('T')[0],
+      date: today,
       amount: value
     });
 
-    updateDisplay();
-    input.value = '';
-    console.log("📌 主動收入紀錄：", activeIncomeRecords); // 可刪除
+    updateDisplay();             // 更新畫面上的數值
+    updateActiveIncomeChart();   // 更新折線圖
+    input.value = '';            // 清空輸入欄
   }
 });
+
 
 // 新增被動收入
 document.getElementById('addPassiveIncome').addEventListener('click', function () {
