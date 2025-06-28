@@ -1,3 +1,4 @@
+let initialFund = 0;
 let activeIncome = 0;
 let passiveIncome = 0;
 
