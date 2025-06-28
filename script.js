@@ -98,13 +98,14 @@ async function loadTasks() {
     const response = await fetch('data/tasks.json');
     const tasks = await response.json();
     const taskList = document.getElementById('task-list');
+    taskList.innerHTML = '';
 
     tasks.forEach(task => {
       const li = document.createElement('li');
       li.innerHTML = `
         <strong>${task.title}</strong><br>
         📝 ${task.description}<br>
-        📅 到期日：${task.due_date} ｜ 💰 價值 NT$${task.value.toLocaleString()}
+        📅 到期日：${task.due} ｜ 💰 價值 NT$${task.value.toLocaleString()}
       `;
       li.style.background = '#f2faff';
       li.style.padding = '10px';
@@ -116,6 +117,7 @@ async function loadTasks() {
     console.error("載入任務失敗：", error);
   }
 }
+
 
 // 頁面載入後自動執行任務載入
 loadTasks();
