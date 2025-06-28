@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Money Quest App</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+  
 <body>
   <header>
     <h1>💰 我的金流升等任務</h1>
@@ -58,6 +60,9 @@
   <p>🌱 被動收入累計：<strong id="passive-total">NT$0</strong></p>
   <p>🏦 當前資產總額：<strong id="earned-total">NT$0</strong></p>
 </section>
+    
+<h2>📈 主動收入成長圖</h2>
+<canvas id="activeIncomeChart" width="600" height="300"></canvas>
 
 
     <h2>📋 任務清單</h2>
