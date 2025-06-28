@@ -1,135 +1,134 @@
+let startingCapital = 0;
 let activeIncome = 0;
 let passiveIncome = 0;
-let startingCapital = 0;
 let targetAmount = 0;
 let endDate = null;
 let activeIncomeRecords = [];
+let incomeChart = null;
 
+// ─── 初始化，載入 localStorage 和畫面 ─────────────────
+function loadData() {
+  startingCapital = Number(localStorage.getItem("initialFund")) || 0;
+  activeIncome     = Number(localStorage.getItem("activeIncome")) || 0;
+  passiveIncome    = Number(localStorage.getItem("passiveIncome")) || 0;
+  targetAmount     = Number(localStorage.getItem("goalAmount"))   || 0;
+  endDate          = localStorage.getItem("goalDeadline")         || null;
+  activeIncomeRecords = JSON.parse(localStorage.getItem("incomeRecords")) || [];
+
+  // 如果有先前設定，再顯示出來
+  document.getElementById("initial-amount").textContent     = `NT$${startingCapital.toLocaleString()}`;
+  document.getElementById("active-total").textContent       = `NT$${activeIncome.toLocaleString()}`;
+  document.getElementById("passive-total").textContent      = `NT$${passiveIncome.toLocaleString()}`;
+  document.getElementById("earned-total").textContent       = `NT$${(startingCapital+activeIncome+passiveIncome).toLocaleString()}`;
+
+  if (targetAmount && endDate) {
+    document.getElementById("goal-amount").textContent = `NT$${targetAmount.toLocaleString()}`;
+    const daysLeft = Math.ceil((new Date(endDate) - new Date())/(1000*60*60*24));
+    document.getElementById("days-left").textContent = `${daysLeft} 天`;
+  }
+
+  updateDisplay();
+  updateActiveIncomeChart();
+}
+
+// ─── 更新畫面所有數值與進度條 ─────────────────────
 function updateDisplay() {
-  const totalAssets = startingCapital + activeIncome + passiveIncome;
-  document.getElementById('startingCapitalDisplay').textContent = `NT$${startingCapital.toLocaleString()}`;
-  document.getElementById('activeIncomeDisplay').textContent = `NT$${activeIncome.toLocaleString()}`;
-  document.getElementById('passiveIncomeDisplay').textContent = `NT$${passiveIncome.toLocaleString()}`;
-  document.getElementById('totalAssetsDisplay').textContent = `NT$${totalAssets.toLocaleString()}`;
+  const total = startingCapital + activeIncome + passiveIncome;
+  document.getElementById("startingCapitalDisplay")?.remove?.(); // just in case old
+  document.getElementById("active-total").textContent  = `NT$${activeIncome.toLocaleString()}`;
+  document.getElementById("passive-total").textContent = `NT$${passiveIncome.toLocaleString()}`;
+  document.getElementById("earned-total").textContent = `NT$${total.toLocaleString()}`;
 
-  // 更新目標進度
   if (targetAmount > 0) {
-    const progress = Math.min((totalAssets / targetAmount) * 100, 100);
-    document.getElementById('progressBar').style.width = `${progress}%`;
-    document.getElementById('progressPercentage').textContent = `${progress.toFixed(1)}%`;
+    const pct = Math.min(100, (total/targetAmount)*100).toFixed(1);
+    document.getElementById("progress-bar").style.width = `${pct}%`;
+    document.getElementById("progress-percent").textContent = `${pct}%`;
   }
 }
 
-// 設定起始資金
-document.getElementById('setStartingCapital').addEventListener('click', function () {
-  const input = document.getElementById('startingCapitalInput');
-  const value = parseInt(input.value);
-  if (!isNaN(value) && value >= 0) {
-    startingCapital = value;
+// ─── 設定起始資金 ─────────────────────────────
+function setInitial() {
+  const v = Number(document.getElementById("initial-fund").value) || 0;
+  if (v>=0) {
+    startingCapital = v;
+    localStorage.setItem("initialFund", v);
+    document.getElementById("initial-amount").textContent = `NT$${v.toLocaleString()}`;
     updateDisplay();
-    input.value = '';
-  }
-});
+    updateActiveIncomeChart();
+    document.getElementById("initial-fund").value = "";
+  } else alert("請輸入有效起始資金");
+}
 
-// 設定目標金額與日期
-document.getElementById('setGoal').addEventListener('click', function () {
-  const goalInput = document.getElementById('goalAmountInput');
-  const dateInput = document.getElementById('goalDateInput');
-  const goalValue = parseInt(goalInput.value);
+// ─── 設定目標挑戰 ─────────────────────────────
+function setGoal() {
+  const amt = Number(document.getElementById("goal-amount-input").value) || 0;
+  const dt  = document.getElementById("goal-deadline-input").value;
+  if (amt>0 && dt) {
+    targetAmount = amt;
+    endDate = dt;
+    localStorage.setItem("goalAmount", amt);
+    localStorage.setItem("goalDeadline", dt);
 
-  if (!isNaN(goalValue) && goalValue > 0 && dateInput.value) {
-    targetAmount = goalValue;
-    endDate = new Date(dateInput.value);
-    const today = new Date();
-    const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
-    document.getElementById('goalAmountDisplay').textContent = `NT$${targetAmount.toLocaleString()}`;
-    document.getElementById('daysLeftDisplay').textContent = `${daysLeft} 天`;
+    document.getElementById("goal-amount").textContent = `NT$${amt.toLocaleString()}`;
+    const daysLeft = Math.ceil((new Date(dt) - new Date())/(1000*60*60*24));
+    document.getElementById("days-left").textContent = `${daysLeft} 天`;
+
     updateDisplay();
+  } else alert("請輸入目標金額與日期");
+}
+
+// ─── 新增收入函式（被主動和被動共用） ─────────────────
+function addIncome(){
+  // 主動
+  const a = Number(document.getElementById("active-income").value) || 0;
+  // 被動
+  const p = Number(document.getElementById("passive-income").value) || 0;
+
+  if (a>0) {
+    activeIncome += a;
+    activeIncomeRecords.push({ date: new Date().toISOString().split("T")[0], amount: a });
+    localStorage.setItem("activeIncome", activeIncome);
+    localStorage.setItem("incomeRecords", JSON.stringify(activeIncomeRecords));
   }
-});
-
-// 儲存主動收入紀錄（時間與金額）
-
-// 新增主動收入按鈕功能
-document.getElementById('addActiveIncome').addEventListener('click', function () {
-  const input = document.getElementById('activeIncomeInput');
-  const value = parseInt(input.value);
-
-  if (!isNaN(value) && value > 0) {
-    activeIncome += value;
-
-    // ➕ 紀錄主動收入時間與金額
-    const today = new Date().toISOString().split('T')[0];
-    activeIncomeRecords.push({
-      date: today,
-      amount: value
-    });
-
-    updateDisplay();             // 更新畫面上的數值
-    updateActiveIncomeChart();   // 更新折線圖
-    input.value = '';            // 清空輸入欄
+  if (p>0) {
+    passiveIncome += p;
+    localStorage.setItem("passiveIncome", passiveIncome);
   }
-});
+  updateDisplay();
+  updateActiveIncomeChart();
+  document.getElementById("active-income").value = "";
+  document.getElementById("passive-income").value = "";
+}
 
+// ─── 畫主動收入成長圖 ─────────────────────────
+function updateActiveIncomeChart(){
+  const ctx = document.getElementById("activeIncomeChart").getContext("2d");
+  const labels = activeIncomeRecords.map(r=>r.date);
+  let cum=0;
+  const data = activeIncomeRecords.map(r=>(cum+=r.amount));
 
-// 新增被動收入
-document.getElementById('addPassiveIncome').addEventListener('click', function () {
-  const input = document.getElementById('passiveIncomeInput');
-  const value = parseInt(input.value);
-
-  if (!isNaN(value) && value > 0) {
-    passiveIncome += value;
-    updateDisplay();
-    input.value = '';
-  }
-});
-
-let incomeChart = null;
-
-function updateActiveIncomeChart() {
-  const ctx = document.getElementById('activeIncomeChart').getContext('2d');
-
-  const dates = activeIncomeRecords.map(r => r.date);
-  const amounts = activeIncomeRecords.map((r, index) =>
-    activeIncomeRecords.slice(0, index + 1).reduce((sum, record) => sum + record.amount, 0)
-  );
-
-  if (incomeChart) {
-    incomeChart.data.labels = dates;
-    incomeChart.data.datasets[0].data = amounts;
+  if (incomeChart){
+    incomeChart.data.labels = labels;
+    incomeChart.data.datasets[0].data = data;
     incomeChart.update();
   } else {
     incomeChart = new Chart(ctx, {
-      type: 'line',
+      type: "line",
       data: {
-        labels: dates,
+        labels,
         datasets: [{
-          label: '主動收入累積金額',
-          data: amounts,
-          borderColor: 'green',
-          backgroundColor: 'lightgreen',
+          label: "主動收入累積",
+          data,
+          borderColor: "green",
+          backgroundColor: "rgba(0,128,0,0.2)",
           fill: true,
           tension: 0.3
         }]
       },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: '金額（NT$）'
-            }
-          },
-          x: {
-            title: {
-              display: true,
-              text: '日期'
-            }
-          }
-        }
-      }
+      options: { responsive: true }
     });
   }
 }
+
+// ─── 啟動 ─────────────────────────────
+window.onload = loadData;
