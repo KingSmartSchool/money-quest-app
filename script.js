@@ -100,12 +100,13 @@ async function loadTasks() {
     const taskList = document.getElementById('task-list');
     taskList.innerHTML = '';
 
-    tasks.forEach(task => {
+    tasks.forEach((task, index) => {
       const li = document.createElement('li');
       li.innerHTML = `
         <strong>${task.title}</strong><br>
         📝 ${task.description}<br>
-        📅 到期日：${task.due} ｜ 💰 價值 NT$${task.value.toLocaleString()}
+        📅 到期日：${task.due} ｜ 💰 價值 NT$${task.value.toLocaleString()}<br>
+        <button onclick="completeTask(this, ${task.value})">✅ 確認完成</button>
       `;
       li.style.background = '#f2faff';
       li.style.padding = '10px';
@@ -118,6 +119,29 @@ async function loadTasks() {
   }
 }
 
-
 // 頁面載入後自動執行任務載入
 loadTasks();
+
+function completeTask(button, value) {
+  // 加入主動收入（或你也可以改成 passiveIncome += value）
+  activeIncome += value;
+
+  // 加入歷史紀錄
+  activeIncomeHistory.push({
+    amount: value,
+    timestamp: new Date().toISOString()
+  });
+
+  // 更新畫面
+  updateDisplay();
+
+  // 把該任務樣式改成完成狀態
+  const li = button.parentElement;
+  li.style.textDecoration = 'line-through';
+  li.style.opacity = '0.6';
+
+  // 禁用按鈕
+  button.disabled = true;
+  button.textContent = '已完成';
+}
+
