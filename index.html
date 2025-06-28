@@ -7,7 +7,7 @@
   <style>
     body { font-family: "Segoe UI", sans-serif; background: #f9f9f9; margin: 0; padding: 1em; }
     .section { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    h2 { margin-top: 0; }
+    h2, h3 { margin-top: 0; }
     input[type="number"], input[type="text"], input[type="date"] {
       padding: 5px; margin-right: 10px;
     }
@@ -75,6 +75,11 @@
   <div class="section">
     <h3>📅 收入紀錄（主動收入）</h3>
     <ul id="activeHistory"></ul>
+  </div>
+
+  <div class="section">
+    <h2>📋 任務清單</h2>
+    <ul id="task-list"></ul>
   </div>
 
   <script src="script.js"></script>
