@@ -49,7 +49,6 @@ document.getElementById('setGoal').addEventListener('click', function () {
 });
 
 // 儲存主動收入紀錄（時間與金額）
-let activeIncomeRecords = [];
 
 // 新增主動收入按鈕功能
 document.getElementById('addActiveIncome').addEventListener('click', function () {
