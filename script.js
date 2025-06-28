@@ -79,3 +79,53 @@ document.getElementById('addPassiveIncome').addEventListener('click', function (
     input.value = '';
   }
 });
+
+let incomeChart = null;
+
+function updateActiveIncomeChart() {
+  const ctx = document.getElementById('activeIncomeChart').getContext('2d');
+
+  const dates = activeIncomeRecords.map(r => r.date);
+  const amounts = activeIncomeRecords.map((r, index) =>
+    activeIncomeRecords.slice(0, index + 1).reduce((sum, record) => sum + record.amount, 0)
+  );
+
+  if (incomeChart) {
+    incomeChart.data.labels = dates;
+    incomeChart.data.datasets[0].data = amounts;
+    incomeChart.update();
+  } else {
+    incomeChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [{
+          label: '主動收入累積金額',
+          data: amounts,
+          borderColor: 'green',
+          backgroundColor: 'lightgreen',
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: '金額（NT$）'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: '日期'
+            }
+          }
+        }
+      }
+    });
+  }
+}
