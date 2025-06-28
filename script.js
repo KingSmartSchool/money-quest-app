@@ -100,24 +100,41 @@ async function loadTasks() {
     const taskList = document.getElementById('task-list');
     taskList.innerHTML = '';
 
-    tasks.forEach((task, index) => {
+    tasks.forEach((task) => {
       const li = document.createElement('li');
-      li.innerHTML = `
-        <strong>${task.title}</strong><br>
-        📝 ${task.description}<br>
-        📅 到期日：${task.due} ｜ 💰 價值 NT$${task.value.toLocaleString()}<br>
-        <button onclick="completeTask(this, ${task.value})">✅ 確認完成</button>
-      `;
       li.style.background = '#f2faff';
       li.style.padding = '10px';
       li.style.marginBottom = '10px';
       li.style.borderRadius = '8px';
+
+      const title = document.createElement('strong');
+      title.textContent = task.title;
+
+      const desc = document.createElement('div');
+      desc.innerHTML = `📝 ${task.description}`;
+
+      const info = document.createElement('div');
+      info.innerHTML = `📅 到期日：${task.due} ｜ 💰 價值 NT$${task.value.toLocaleString()}`;
+
+      const button = document.createElement('button');
+      button.textContent = '✅ 確認完成';
+      button.onclick = () => completeTask(button, task.value);
+
+      li.appendChild(title);
+      li.appendChild(document.createElement('br'));
+      li.appendChild(desc);
+      li.appendChild(document.createElement('br'));
+      li.appendChild(info);
+      li.appendChild(document.createElement('br'));
+      li.appendChild(button);
+
       taskList.appendChild(li);
     });
   } catch (error) {
     console.error("載入任務失敗：", error);
   }
 }
+
 
 // 頁面載入後自動執行任務載入
 loadTasks();
