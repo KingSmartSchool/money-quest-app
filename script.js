@@ -95,28 +95,27 @@ updateDisplay();
 // 載入任務清單
 async function loadTasks() {
   try {
-    const response = await fetch("data/tasks.json");
+    const response = await fetch('data/tasks.json');
     const tasks = await response.json();
-    const taskList = document.getElementById("taskList");
+    const taskList = document.getElementById('task-list');
 
     tasks.forEach(task => {
-      const taskItem = document.createElement("div");
-      taskItem.className = "task-item";
-      taskItem.style.backgroundColor = "#e6faff";
-      taskItem.style.padding = "10px";
-      taskItem.style.marginBottom = "10px";
-      taskItem.style.borderRadius = "10px";
-
-      taskItem.innerHTML = `
+      const li = document.createElement('li');
+      li.innerHTML = `
         <strong>${task.title}</strong><br>
         📝 ${task.description}<br>
         📅 到期日：${task.due_date} ｜ 💰 價值 NT$${task.value.toLocaleString()}
       `;
-      taskList.appendChild(taskItem);
+      li.style.background = '#f2faff';
+      li.style.padding = '10px';
+      li.style.marginBottom = '10px';
+      li.style.borderRadius = '8px';
+      taskList.appendChild(li);
     });
   } catch (error) {
-    console.error("載入任務時發生錯誤：", error);
+    console.error("載入任務失敗：", error);
   }
 }
 
+// 頁面載入後自動執行任務載入
 loadTasks();
